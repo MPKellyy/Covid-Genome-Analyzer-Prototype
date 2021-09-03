@@ -1,3 +1,4 @@
+import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
@@ -106,4 +107,52 @@ public class VariantGroup {
         return filteredSimMap;
     }
 
+    //Find sequences and orders
+    public Map<String, String> findSimilaritiesOrdered() {
+        //get arraylist
+        //Create Map
+        //String for sequence order i-j
+        //String for sequence itself
+        //Start index
+        //Loop through list until last character is read
+            //If next is not current
+                //Save string and order to map
+                //Set sequence and order strings to empty
+                //Set start to next index
+            //else
+                //sequence += current char
+
+        ArrayList<Character> unfilteredSequence = generateSimilaritySequence();
+        Map<String, String> similaritiesOrdered = new HashMap<String, String>();
+        String order = "";
+        String sequence = "";
+        int start = 0;
+        boolean needStart = unfilteredSequence.get(0) == '-';
+
+        for(int i = 0; i < unfilteredSequence.size(); i++) {
+            if(unfilteredSequence.get(i) == '-' && !needStart) {
+                order = Integer.toString(start) + "-" + Integer.toString(i-1);
+                similaritiesOrdered.put(order, sequence);
+                order = "";
+                sequence = "";
+                needStart = true;
+                start = -1;
+            }
+            else if(needStart && unfilteredSequence.get(i) != '-') {
+                start = i;
+                sequence += unfilteredSequence.get(i);
+                needStart = false;
+            }
+            else if (unfilteredSequence.get(i) != '-'){
+                sequence += unfilteredSequence.get(i);
+            }
+        }
+
+        if(start != -1) {
+            order = Integer.toString(start) + "-" + Integer.toString(unfilteredSequence.size()-1);
+            similaritiesOrdered.put(order, sequence);
+        }
+
+        return similaritiesOrdered;
+    }
 }

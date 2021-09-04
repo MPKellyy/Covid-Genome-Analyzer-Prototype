@@ -12,12 +12,21 @@ public class VariantGroup {
      * Need to ensure string lengths are same. Save length of largest string, add x for to left over strings, update fcn? deletes?
      */
     private ArrayList<String> genomes;
+    private int MAX_SIZE;
 
     /**
      * Constructor for VariantGroup
      */
-    public VariantGroup() {
+    public VariantGroup(int MAX_SIZE) {
         genomes = new ArrayList<String>();
+
+        if(MAX_SIZE <= 0) {
+            this.MAX_SIZE = 1;
+        }
+        else {
+            this.MAX_SIZE = MAX_SIZE;
+        }
+
     }
 
     /**
@@ -25,7 +34,7 @@ public class VariantGroup {
      * @param genome string sequence of a genome
      */
     public void addGenome(String genome) {
-        genomes.add(genome);
+        genomes.add(genomeAdjuster(genome));
     }
 
     /**
@@ -34,7 +43,7 @@ public class VariantGroup {
      */
     public void addGenomes(ArrayList<String> inputGenomes) {
         for(String genome: inputGenomes)
-            genomes.add(genome);
+            genomes.add(genomeAdjuster(genome));
     }
 
     /**
@@ -179,4 +188,18 @@ public class VariantGroup {
 
         return similaritiesOrdered;
     }
+
+    private String genomeAdjuster(String genome) {
+        if(genome.length() > MAX_SIZE) {
+            genome = genome.substring(0, MAX_SIZE);
+        }
+        else if(genome.length() < MAX_SIZE) {
+            for(int i = genome.length(); i < MAX_SIZE; i++) {
+                genome += "-";
+            }
+        }
+
+        return genome;
+    }
+
 }

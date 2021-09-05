@@ -15,7 +15,7 @@ public class main {
         test.addGenomes(wordList);
 
         //Verifying Results
-        Map<String, String> similarities = test.findSimilaritiesOrdered(5);
+        Map<String, String> similarities = test.findSimilaritiesOrdered(4);
 
         for(String key: similarities.keySet()) {
             System.out.println(similarities.get(key) + ": " + key);
@@ -47,7 +47,6 @@ public class main {
                 if(nextLine.equals("/")) {
                     genomeArray.add(genome);
                     genome = "";
-                    nextLine = "";
                 }
                 else {
                     genome += nextLine;

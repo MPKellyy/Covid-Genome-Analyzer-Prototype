@@ -91,6 +91,10 @@ public class VariantGroup {
      * at a given index
      */
     public ArrayList<Character> generateSimilaritySequence() {
+        //Checking if stored genome list is empty
+        if(genomes.isEmpty())
+            return new ArrayList<Character>();
+
         //Setting first saved genome as the string being compared
         String base = genomes.get(0);
         //Keeps track if all genomes match at a specified position in their sequence
@@ -143,7 +147,11 @@ public class VariantGroup {
      * Finds similar nucleotide sequences between same strains and their locations within genomes
      * @return
      */
-    public Map<String, String> findSimilaritiesOrdered() {
+    public Map<String, String> findSimilaritiesOrdered(int filterSequenceSizeBelow) {
+        //Case for if genomes list is empty
+        if(genomes.isEmpty())
+            return new HashMap<String, String>();
+
         //Saves generated unfilteredNucleotide Sequence
         ArrayList<Character> unfilteredSequence = generateSimilaritySequence();
         //Map for saving sequences to genomes respective locations
@@ -162,7 +170,8 @@ public class VariantGroup {
             //Case for when a '-' is first encountered
             if(unfilteredSequence.get(i) == '-' && !needStart) {
                 order = Integer.toString(start) + "-" + Integer.toString(i-1);
-                similaritiesOrdered.put(order, sequence);
+                if(sequence.length() >= filterSequenceSizeBelow)
+                    similaritiesOrdered.put(order, sequence);
                 order = "";
                 sequence = "";
                 needStart = true;
@@ -183,7 +192,8 @@ public class VariantGroup {
         //Ensuring final sequence gets saved if possible
         if(start != -1) {
             order = Integer.toString(start) + "-" + Integer.toString(unfilteredSequence.size()-1);
-            similaritiesOrdered.put(order, sequence);
+            if(sequence.length() >= filterSequenceSizeBelow)
+                similaritiesOrdered.put(order, sequence);
         }
 
         return similaritiesOrdered;

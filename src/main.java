@@ -14,13 +14,23 @@ public class main {
         VariantGroup test = new VariantGroup(30000);
         test.addGenomes(wordList);
 
+//        ArrayList<Character> test2 = test.generateSimilaritySequence();
+//
+//        for(Character letter: test2){
+//            System.out.println(letter);
+//        }
+
         //Verifying Results
-        Map<String, String> similarities = test.findSimilaritiesOrdered(4);
+        Map<String, String> similarities = test.findSimilaritiesOrdered(6);
 
         for(String key: similarities.keySet()) {
             System.out.println(similarities.get(key) + ": " + key);
         }
 
+        //TODO: Don't let n affect similarity logic
+        //TODO: Translate to amino acids
+        //TODO: All Amino acids
+        //TODO: All Amino acid sequences
         //TODO: Order sequences by position
         //TODO: Identify basic genetic sequences
         //TODO: Find differences?
@@ -45,12 +55,13 @@ public class main {
                 nextLine = scanner.nextLine();
 
                 if(nextLine.equals("/")) {
+                    //System.out.println(genome);
                     genomeArray.add(genome);
                     genome = "";
                 }
                 else {
                     genome += nextLine;
-                    genome = genome.replaceAll("[^atgc]", "");
+                    genome = genome.replaceAll("[^atgcn]", "");
                     genome = genome.replace(" ", "");
                 }
 

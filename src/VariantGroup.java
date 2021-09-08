@@ -108,8 +108,10 @@ public class VariantGroup {
             //Looping through all genomes other than the first (which is being compared to)
             for(int j = 1; j < genomes.size(); j++) {
                 //If at any point at least one genome does not match, comparisons are stopped for current position
-                if(genomes.get(j).charAt(i) != base.charAt(i)) {
+                //TODO: Fix logic here
+                if((genomes.get(j).charAt(i) != base.charAt(i)) && (genomes.get(j).charAt(i) != 'n') && (base.charAt(i) != 'n')) {
                     allMatch = false;
+                    //System.out.println("Failing Char: " + genomes.get(j).charAt(i));
                     break;
                 }
             }

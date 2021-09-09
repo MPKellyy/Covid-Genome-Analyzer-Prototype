@@ -101,15 +101,25 @@ public class VariantGroup {
         boolean allMatch = true;
         //List that will keep track of nucleotide positions
         ArrayList<Character> unfilteredSequence = new ArrayList<Character>();
+        Character currentNucleotide;
 
         //Looping through every element of first genome
         for(int i = 0; i < base.length(); i++) {
+            currentNucleotide = base.charAt(i);
+
+            if(currentNucleotide == 'n') {
+                for(String genome: genomes) {
+                    if(genome.charAt(i) != 'n') {
+                        currentNucleotide = genome.charAt(i);
+                        break;
+                    }
+                }
+            }
 
             //Looping through all genomes other than the first (which is being compared to)
             for(int j = 1; j < genomes.size(); j++) {
                 //If at any point at least one genome does not match, comparisons are stopped for current position
-                //TODO: Fix logic here
-                if((genomes.get(j).charAt(i) != base.charAt(i)) && (genomes.get(j).charAt(i) != 'n') && (base.charAt(i) != 'n')) {
+                if((genomes.get(j).charAt(i) != currentNucleotide) && (genomes.get(j).charAt(i) != 'n') && (currentNucleotide != 'n')) {
                     allMatch = false;
                     //System.out.println("Failing Char: " + genomes.get(j).charAt(i));
                     break;
@@ -118,7 +128,7 @@ public class VariantGroup {
 
             //If all matched, add the matching character to the Character ArrayList
             if(allMatch)
-                unfilteredSequence.add(base.charAt(i));
+                unfilteredSequence.add(currentNucleotide);
             //Else, mark difference with a '-'
             else
                 unfilteredSequence.add('-');

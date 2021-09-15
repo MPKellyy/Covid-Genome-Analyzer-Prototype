@@ -1,5 +1,7 @@
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
@@ -24,8 +26,10 @@ public class main {
         Map<String, String> similarities = test.findSimilaritiesOrdered(6);
 
         for(String key: similarities.keySet()) {
-            System.out.println(similarities.get(key) + ": " + key);
+            System.out.println(key + ": " + similarities.get(key));
         }
+
+        System.out.println(writeFilteredGenomes(wordList));
 
         //TODO: Don't let n affect similarity logic
         //TODO: Translate to amino acids
@@ -74,5 +78,31 @@ public class main {
         }
 
         return genomeArray;
+    }
+
+    public static boolean writeFilteredGenomes(ArrayList<String> genomeList) {
+        try {
+            File myObj = new File("filteredGenomes.txt");
+            if (myObj.createNewFile()) {
+                System.out.println("File created: " + myObj.getName());
+            } else {
+                System.out.println("File already exists.");
+            }
+
+            FileWriter fileWrite = new FileWriter("filteredGenomes.txt");
+
+            for(String genome: genomeList) {
+                fileWrite.write(genome);
+                fileWrite.write("\n\n\n\n");
+            }
+
+            fileWrite.close();
+
+            return true;
+        } catch (IOException e) {
+            System.out.println("An error occurred.");
+            e.printStackTrace();
+            return false;
+        }
     }
 }

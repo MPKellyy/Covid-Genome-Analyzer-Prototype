@@ -1,7 +1,11 @@
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.TreeMap;
 
 /**
  * Class for comparing similarities between genomes of a viral strain
@@ -13,12 +17,14 @@ public class VariantGroup {
      */
     private ArrayList<String> genomes;
     private int MAX_SIZE;
+    private String variantName;
 
     /**
      * Constructor for VariantGroup
      */
-    public VariantGroup(int MAX_SIZE) {
+    public VariantGroup(String variantName, int MAX_SIZE) {
         genomes = new ArrayList<String>();
+        this.variantName = variantName;
 
         if(MAX_SIZE <= 0) {
             this.MAX_SIZE = 1;
@@ -162,12 +168,12 @@ public class VariantGroup {
     public Map<String, String> findSimilaritiesOrdered(int filterSequenceSizeBelow) {
         //Case for if genomes list is empty
         if(genomes.isEmpty())
-            return new HashMap<String, String>();
+            return new TreeMap<String, String>();
 
         //Saves generated unfilteredNucleotide Sequence
         ArrayList<Character> unfilteredSequence = generateSimilaritySequence();
         //Map for saving sequences to genomes respective locations
-        Map<String, String> similaritiesOrdered = new HashMap<String, String>();
+        Map<String, String> similaritiesOrdered = new TreeMap<String, String>();
         //String for sequence location on genome
         String order = "";
         //String for saving nucleotide
@@ -181,7 +187,7 @@ public class VariantGroup {
         for(int i = 0; i < unfilteredSequence.size(); i++) {
             //Case for when a '-' is first encountered
             if(unfilteredSequence.get(i) == '-' && !needStart) {
-                order = Integer.toString(start) + "-" + Integer.toString(i-1);
+                order = Integer.toString(start).length() + "-" + Integer.toString(start) + "-" + Integer.toString(i-1);
                 if(sequence.length() >= filterSequenceSizeBelow)
                     similaritiesOrdered.put(order, sequence);
                 order = "";
@@ -222,6 +228,44 @@ public class VariantGroup {
         }
 
         return genome;
+    }
+
+    public boolean writeAnalysis(int filterSequenceSizeBelow) {
+        try {
+            String fileName = variantName + "-analysis-results" + ".txt";
+            File myObj = new File(fileName);
+            if (myObj.createNewFile()) {
+                System.out.println("File created: " + myObj.getName());
+            } else {
+                System.out.println("File already exists.");
+                return false;
+            }
+
+            FileWriter fileWrite = new FileWriter(fileName);
+
+
+            fileWrite.write("Name of Variant: " + variantName);
+            fileWrite.write("\n\n\n\n");
+
+            fileWrite.write("Similarity Sequences: ");
+            fileWrite.write("\n\n");
+
+            Map<String, String> similarities = findSimilaritiesOrdered(filterSequenceSizeBelow);
+
+            for(String key: similarities.keySet()) {
+                String keyCopy = key;
+                keyCopy = keyCopy.substring(2, keyCopy.length());
+                fileWrite.write("[\n" + keyCopy + "\n:::\n" + similarities.get(key) + "\n]\n\n");
+            }
+
+            fileWrite.close();
+
+            return true;
+        } catch (IOException e) {
+            System.out.println("An error occurred.");
+            e.printStackTrace();
+            return false;
+        }
     }
 
 }

@@ -9,27 +9,16 @@ import java.util.Scanner;
 
 public class main {
     public static void main(String[] args) {
-        //Reading/saving Strings from text file
-        ArrayList<String> wordList = readTextfile();
-
         //Setting VariantGroup
-        VariantGroup test = new VariantGroup(30000);
-        test.addGenomes(wordList);
+        generateResult("Beta", 30000, 10);
+        generateResult("Alpha", 30000, 10);
+        generateResult("Delta", 30000, 10);
+        generateResult("Kappa", 30000, 10);
+        generateResult("Gamma", 30000, 10);
+        generateResult("Iota", 30000, 10);
+        generateResult("Eta", 30000, 10);
+        generateResult("Lambda", 30000, 10);
 
-//        ArrayList<Character> test2 = test.generateSimilaritySequence();
-//
-//        for(Character letter: test2){
-//            System.out.println(letter);
-//        }
-
-        //Verifying Results
-        Map<String, String> similarities = test.findSimilaritiesOrdered(6);
-
-        for(String key: similarities.keySet()) {
-            System.out.println(key + ": " + similarities.get(key));
-        }
-
-        System.out.println(writeFilteredGenomes(wordList));
 
         //TODO: Don't let n affect similarity logic
         //TODO: Translate to amino acids
@@ -46,11 +35,11 @@ public class main {
      * Function reads in genomes from a text file
      * @return Returns an ArrayList of genomes read in from file
      */
-    public static ArrayList<String> readTextfile() {
+    public static ArrayList<String> readTextfile(String fileName) {
         ArrayList<String> genomeArray = new ArrayList<String>();
 
         try {
-            File file = new File("genomes.txt");
+            File file = new File(fileName + ".txt");
             Scanner scanner = new Scanner(file);
             String genome = "";
             String nextLine = "";
@@ -87,6 +76,7 @@ public class main {
                 System.out.println("File created: " + myObj.getName());
             } else {
                 System.out.println("File already exists.");
+                return false;
             }
 
             FileWriter fileWrite = new FileWriter("filteredGenomes.txt");
@@ -104,5 +94,13 @@ public class main {
             e.printStackTrace();
             return false;
         }
+    }
+
+    public static void generateResult(String variantName, int MAX_SIZE, int filterNum) {
+        ArrayList<String> wordList = readTextfile(variantName);
+        wordList = readTextfile(variantName);
+        VariantGroup variant = new VariantGroup(variantName,MAX_SIZE);
+        variant.addGenomes(wordList);
+        variant.writeAnalysis(filterNum);
     }
 }

@@ -217,6 +217,11 @@ public class VariantGroup {
         return similaritiesOrdered;
     }
 
+    /**
+     * Function used to ensure that genome string length abides by the MAX_SIZE passed in by user
+     * @param genome
+     * @return
+     */
     private String genomeAdjuster(String genome) {
         if(genome.length() > MAX_SIZE) {
             genome = genome.substring(0, MAX_SIZE);
@@ -230,6 +235,11 @@ public class VariantGroup {
         return genome;
     }
 
+    /**
+     * Function used to output strain average to txt file (commonly occurring sequences within a strsin)
+     * @param filterSequenceSizeBelow
+     * @return
+     */
     public boolean writeAnalysis(int filterSequenceSizeBelow) {
         try {
             String fileName = variantName + "-analysis-results" + ".txt";

@@ -74,38 +74,33 @@ public class main {
          * The end result is a sequence of nucleotide sequences that were kept between each parent-child
          * strain in the lineage.
          *
-         * Note: Each computation as of now takes a VERY long time to compute (approx 3-4 hours).
+         * Note: Each computation as of now takes a VERY long time to compute (approx 2-3 hours).
          * To save time, I have included a txt file that already has the compiled results
-         * called "unfiltered-lineage-similarities.txt".
+         * called "lineage-average.txt".
          */
-        //Setting up array that will hold all of the unit averages
-        ArrayList<String> similarityArray = new ArrayList<String>();
+        //String that will hold lineageAverage
+        String lineageAverage = "";
 
-
-        //If the pre-computed file is present, the unit averages will be extracted from the file
+        //If lineage-average.txt is present, contents from precomputed file are extracted
         try {
-            File file = new File("unfiltered-lineage-similarities.txt");
+            File file = new File("lineage-average.txt");
             Scanner scanner = new Scanner(file);
-            String fragment = "";
-            String nextLine = "";
+            String nextLine;
 
             while(scanner.hasNextLine()) {
                 nextLine = scanner.nextLine();
-
-                if(nextLine.equals("/")) {
-                    similarityArray.add(fragment);
-                    fragment = "";
-                }
-                else {
-                    fragment += nextLine;
-                }
-
+                lineageAverage += nextLine;
             }
-            scanner.close();
 
+            lineageAverage = lineageAverage.replaceAll(" ", "");
+
+            scanner.close();
         }
-        //If the file is not present, the code will undergo the long computation process
+        //If the precomputed file is not found, lineage average is calculate (approx 2-4 hr)
         catch (FileNotFoundException e) {
+            //Setting up array that will hold all of the unit averages
+            ArrayList<String> similarityArray = new ArrayList<String>();
+
             //Creating parent-child associations
             ParentChildComparator parentChildBA = new ParentChildComparator(Beta, Alpha);
             ParentChildComparator parentChildAD = new ParentChildComparator(Alpha, Delta);
@@ -116,54 +111,35 @@ public class main {
             ParentChildComparator parentChildEL = new ParentChildComparator(Eta, Lambda);
 
             //Adding the unit averages into a singular array
-            updateSimilarityArray(similarityArray, parentChildBA.computeSimilarityString(FILTER_NUM));
-            updateSimilarityArray(similarityArray, parentChildAD.computeSimilarityString(FILTER_NUM));
-            updateSimilarityArray(similarityArray, parentChildDK.computeSimilarityString(FILTER_NUM));
-            updateSimilarityArray(similarityArray, parentChildKG.computeSimilarityString(FILTER_NUM));
-            updateSimilarityArray(similarityArray, parentChildGI.computeSimilarityString(FILTER_NUM));
-            updateSimilarityArray(similarityArray, parentChildIE.computeSimilarityString(FILTER_NUM));
-            updateSimilarityArray(similarityArray, parentChildEL.computeSimilarityString(FILTER_NUM));
+            updateSimilarityArray(similarityArray, parentChildBA.computeUnitAverage(FILTER_NUM));
+            updateSimilarityArray(similarityArray, parentChildAD.computeUnitAverage(FILTER_NUM));
+            updateSimilarityArray(similarityArray, parentChildDK.computeUnitAverage(FILTER_NUM));
+            updateSimilarityArray(similarityArray, parentChildKG.computeUnitAverage(FILTER_NUM));
+            updateSimilarityArray(similarityArray, parentChildGI.computeUnitAverage(FILTER_NUM));
+            updateSimilarityArray(similarityArray, parentChildIE.computeUnitAverage(FILTER_NUM));
+            updateSimilarityArray(similarityArray, parentChildEL.computeUnitAverage(FILTER_NUM));
 
-            //Writing a the lineage average to a text file for faster computation next time code is ran
-            writeUnfilteredLineageSimilarities(similarityArray);
-        }
+            //Removing duplicates (duplicates include substrings of strings in the arraylist)
+            ArrayList<String> filteredSimilarities = (ArrayList<String>) similarityArray.clone();
 
-        //Removing duplicates from found between unit averages in lineage
-
-        //These lines of code are a work around to a formatting issue I encountered with the text files...
-        //TODO: Optimize this better
-        String tempStr = similarityArray.toString();
-        tempStr = tempStr.substring(1, tempStr.length()-1);
-        tempStr = tempStr.replaceAll("[, ]", "");
-
-        String[] tempArray = tempStr.split("/");
-
-        //Will require an arraylist for the filtration process
-        ArrayList<String> filteredSimilarities = new ArrayList<String>();
-
-        for(String contents: tempArray) {
-            filteredSimilarities.add(contents);
-        }
-
-        //Removing duplicates (duplicates include substrings of strings in the arraylist)
-        for(String sequence1: tempArray) {
-            for(String sequence2: tempArray) {
-                if(!sequence1.equals(sequence2) && sequence1.contains(sequence2)) {
-                    filteredSimilarities.remove(sequence2);
+            for(String sequence1: similarityArray) {
+                for(String sequence2: similarityArray) {
+                    if(!sequence1.equals(sequence2) && sequence1.contains(sequence2)) {
+                        filteredSimilarities.remove(sequence2);
+                    }
                 }
             }
+
+            //Concatenating all unit averages into one string
+            for(String similarity: filteredSimilarities) {
+                lineageAverage += similarity;
+            }
+
+            writeLineageAverage(lineageAverage);
         }
 
-        //Concatenating all unit averages into one string
-        String similarityString = "";
-        for(String similarity: filteredSimilarities) {
-            similarityString += similarity;
-        }
 
-        System.out.println(similarityString);
-
-        writeLineageSimilarity(similarityString);
-
+        System.out.println(lineageAverage);
 
 
 
@@ -187,7 +163,6 @@ public class main {
                 nextLine = scanner.nextLine();
 
                 if(nextLine.equals("/")) {
-                    //System.out.println(genome);
                     genomeArray.add(genome);
                     genome = "";
                 }
@@ -208,33 +183,6 @@ public class main {
         return genomeArray;
     }
 
-    public static boolean writeFilteredGenomes(ArrayList<String> genomeList) {
-        try {
-            File myObj = new File("filteredGenomes.txt");
-            if (myObj.createNewFile()) {
-                System.out.println("File created: " + myObj.getName());
-            } else {
-                System.out.println("File already exists.");
-                return false;
-            }
-
-            FileWriter fileWrite = new FileWriter("filteredGenomes.txt");
-
-            for(String genome: genomeList) {
-                fileWrite.write(genome);
-                fileWrite.write("\n\n\n\n");
-            }
-
-            fileWrite.close();
-
-            return true;
-        } catch (IOException e) {
-            System.out.println("An error occurred.");
-            e.printStackTrace();
-            return false;
-        }
-    }
-
     /**
      * Function used to create txt file containing the strain average result (similarities within a strain)
      * @param variant Type of strain
@@ -246,74 +194,6 @@ public class main {
         wordList = readTextfile(variantName);
         variant.addGenomes(wordList);
         variant.writeAnalysis(filterNum);
-    }
-
-    /**
-     * Function used to write the unfiltered unit averages found across lineage
-     * This is used to speed up computation speed everytime code is ran
-     * @param similarityList list containing all units averages
-     * @return true/false depending on operation completion
-     */
-    public static boolean writeUnfilteredLineageSimilarities(ArrayList<String> similarityList) {
-        try {
-            File myObj = new File("unfiltered-lineage-similarities.txt");
-            if (myObj.createNewFile()) {
-                System.out.println("File created: " + myObj.getName());
-            } else {
-                System.out.println("File already exists.");
-                return false;
-            }
-
-            FileWriter fileWrite = new FileWriter("unfiltered-lineage-similarities.txt");
-
-            for(String fragment: similarityList) {
-                fileWrite.write(fragment +"\n");
-                fileWrite.write('/' + "\n");
-            }
-
-            fileWrite.close();
-
-            return true;
-        } catch (IOException e) {
-            System.out.println("An error occurred.");
-            e.printStackTrace();
-            return false;
-        }
-    }
-
-    /**
-     * Function used to extract unit averages from a txt file rather than undergoing a lengthy computation
-     * @param fileName File name
-     * @return true/false depending on operation completion
-     */
-    public static ArrayList<String> readUnfilteredLineageSimilarities(String fileName) {
-        ArrayList<String> fragmentArray = new ArrayList<String>();
-
-        try {
-            File file = new File(fileName + ".txt");
-            Scanner scanner = new Scanner(file);
-            String fragment = "";
-            String nextLine = "";
-
-            while(scanner.hasNextLine()) {
-                nextLine = scanner.nextLine();
-
-                if(nextLine.equals("/")) {
-                    fragmentArray.add(fragment);
-                    fragment = "";
-                }
-                else {
-                    fragment += nextLine;
-                }
-
-            }
-            scanner.close();
-        }
-        catch (FileNotFoundException e) {
-
-        }
-
-        return fragmentArray;
     }
 
     /**
@@ -332,9 +212,9 @@ public class main {
      * @param similaritySequence compiled and filtered unit averages
      * @return true/false based on operation completion
      */
-    public static boolean writeLineageSimilarity(String similaritySequence) {
+    public static boolean writeLineageAverage(String similaritySequence) {
         try {
-            File myObj = new File("lineage-similarity.txt");
+            File myObj = new File("lineage-average.txt");
             if (myObj.createNewFile()) {
                 System.out.println("File created: " + myObj.getName());
             } else {
@@ -342,7 +222,7 @@ public class main {
                 return false;
             }
 
-            FileWriter fileWrite = new FileWriter("lineage-similarity.txt");
+            FileWriter fileWrite = new FileWriter("lineage-average.txt");
             fileWrite.write(similaritySequence);
             fileWrite.close();
 

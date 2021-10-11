@@ -24,6 +24,26 @@ public class main {
          *
          * The primary goal prior to executing this code is to identify a lineage pattern.
          */
+        //According to the WHO, the first covid variants of concern appeared in the following order (left being oldest/greatest ancestor, right being newest/greatest successor)
+        //Beta->Alpha->Delta->Kappa->Gamma->Iota->Eta->Lambda
+
+        //The parent-child units are also shown in a linear format, where x in (x,y) is the parent, and y the child
+        //(Beta,Alpha) ; (Alpha,Delta) ; (Delta,Kappa) ; (Kappa,Gamma) ; (Gamma,Iota) ; (Iota,Eta) , (Eta,Lambda)
+
+        //Ancestor-successor associations are shown below, where [x1, x2...] are ancestors to z, {z} is the strain being examined, and (y1, y2, ...) are successors to z
+        //[] {Beta} (Alpha,Delta,Kappa,Gamma,Iota,Eta,Lambda)
+        //[Beta] {Alpha} (Delta,Kappa,Gamma,Iota,Eta,Lambda)
+        //[Beta,Alpha] {Delta} (Kappa,Gamma,Iota,Eta,Lambda)
+        //[Beta,Alpha,Delta] {Kappa} (Gamma,Iota,Eta,Lambda)
+        //[Beta,Alpha,Delta,Kappa] {Gamma} (Iota,Eta,Lambda)
+        //[Beta,Alpha,Delta,Kappa,Gamma] {Iota} (Eta,Lambda)
+        //[Beta,Alpha,Delta,Kappa,Gamma,Iota] {Eta} (Lambda)
+        //[Beta,Alpha,Delta,Kappa,Gamma,Iota,Eta] {Lambda} ()
+
+        //The ultimate goal of this code is to compile a data set that contains the nucleotide sequence similarities of parent-child units in linear order from greatest ancestor to greatest successor
+        //This is done by first finding common sequences within each individual variants itself using 3 separate genomes represent each strain
+        //After common sequences are found within a variant, commonalities are then found between each variants parent/child strains in linear order from ancestor to successor
+        //The result of the above comparison computes a lineageAverage, which is then converted to a data set that can be used for pattern data mining
 
 
 
@@ -119,28 +139,18 @@ public class main {
             updateSimilarityArray(similarityArray, parentChildIE.computeUnitAverage(FILTER_NUM));
             updateSimilarityArray(similarityArray, parentChildEL.computeUnitAverage(FILTER_NUM));
 
-            //Removing duplicates (duplicates include substrings of strings in the arraylist)
-            ArrayList<String> filteredSimilarities = (ArrayList<String>) similarityArray.clone();
-
-            for(String sequence1: similarityArray) {
-                for(String sequence2: similarityArray) {
-                    if(!sequence1.equals(sequence2) && sequence1.contains(sequence2)) {
-                        filteredSimilarities.remove(sequence2);
-                    }
-                }
-            }
-
             //Concatenating all unit averages into one string
-            for(String similarity: filteredSimilarities) {
+            for(String similarity: similarityArray) {
                 lineageAverage += similarity;
             }
 
             writeLineageAverage(lineageAverage);
         }
 
-        lineageAverageConverter testing = new lineageAverageConverter(lineageAverage);
+        lineageAverageConverter variantLineage = new lineageAverageConverter(lineageAverage);
 
-        System.out.println(testing.convertAverageToInput());
+        System.out.println(variantLineage.convertAverageToPatternInput());
+        System.out.println(variantLineage.convertAverageToAprioriInput());
 
     }
 

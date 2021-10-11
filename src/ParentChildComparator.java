@@ -23,91 +23,178 @@ public class ParentChildComparator {
      */
     ArrayList<String> computeUnitAverage(int filterNum){
         //Setting up necessary variables
-        ArrayList<String> allCommonSequences = new ArrayList<String>();
-
         Map<String, String> parentMap = parent.findSimilaritiesOrdered(filterNum);
         Map<String, String> childMap = child.findSimilaritiesOrdered(filterNum);
-        Map<String, String> tempSave = new HashMap<String, String>();
 
-        String s1 = "";
-        String s2 = "";
-        String currentS;
-        String previousS;
+        String s = "";
+        String t = "";
 
         //Extracting contents from parent and child similarity maps into strings for easier analysis
         for(String parentKey: parentMap.keySet()) {
-            s1 += parentMap.get(parentKey) + "*";
+            s += parentMap.get(parentKey) + "*";
         }
 
         for(String childKey: childMap.keySet()) {
-            s2 += childMap.get(childKey) + "*";
+            t += childMap.get(childKey) + "-";
         }
 
-        //To increase efficiency, if statement below keeps track of which strain has the most/least amount of sequences
-        //If the current parent has less sequences than the child, the two are swapped code-wise to reduce
-        //the amount of iterations in the computation (result will be the same regardless, just a matter of saved time)
-        if(s1.length() < s2.length()) {
-            String temp = s1;
-            s1 = s2;
-            s2 = temp;
+//        s = "Hello";
+//        t = "Hello World";
+
+
+        //Ensuring strings are same size
+        int sSize = s.length();
+        int tSize = t.length();
+
+        if(sSize > tSize) {
+            int difference = sSize - tSize;
+            for(int i = 0; i < difference; i++) {
+                t += "-";
+            }
+        }
+        else if(tSize > sSize) {
+            int difference = tSize - sSize;
+
+            for(int i = 0; i < difference; i++) {
+                s += "*";
+            }
         }
 
 
-        //These nested loops check to see if every substring of the child similarities is within the parent similarities
-        for(int i = 0; i < s2.length(); i++) {
-            currentS = "";
+        //Setting up variables
+        int[][] table = new int[s.length()][t.length()];
+        ArrayList<String> holder = new ArrayList<String>();
 
-            //This line of code separates the child string into the original saved sequences (ensures that correct sequences are used for comparisons)
-            //For example, child string = 'hello*world'
-            //Rather than checking if 'hello*world' is in parent string, 'hello' and 'world' are checked separately
-            if(s2.charAt(i) == '*')
-                continue;
+        int previousSequence;
+        int currentSequence;
 
-            for(int j = i; j < s2.length(); j++) {
-                previousS = currentS;
-                currentS += s2.charAt(j);
+        boolean foundSequence = false;
+        ArrayList<String> words = new ArrayList<>();
 
-                //If a common substring that was not seen before, save it in an arraylist
-                if(s1.contains(previousS) && !s1.contains(currentS) && !tempSave.containsKey(previousS) && !previousS.equals("")) {
 
-                    //Checking if the similar nucleotide fragment is the requested size, only adds if size is with desired range
-                    if(previousS.length() >= filterNum) {
-                        //Adding sequence/fragment
-                        allCommonSequences.add(previousS);
-
-                        //Map that keeps track of the substrings of the sequences already saved
-                        //This map is used to ensure that no duplicate strings (same strings or substrings of strings) are saved
-                        for(int k = 0; k < previousS.length(); k++) {
-                            tempSave.put(previousS.substring(k), previousS);
-                        }
-                    }
-
-                    currentS = "";
+        //Setting up table
+        for (int i = 0; i < s.length(); i++) {
+            for (int j = 0; j < t.length(); j++) {
+                if (s.charAt(i) != t.charAt(j)) {
+                    continue;
                 }
-                //If a sequence was not found in the parent and a new sequence needs to be checked,
-                else if(currentS.contains("*")) {
-                    if(s1.contains(previousS) && !tempSave.containsKey(previousS) && !previousS.equals("") && previousS.length() >= filterNum) {
-                        //Adding sequence/fragment
-                        allCommonSequences.add(previousS);
 
-                        //Map that keeps track of the substrings of the sequences already saved
-                        //This map is used to ensure that no duplicate strings (same strings or substrings of strings) are saved
-                        for(int k = 0; k < previousS.length(); k++) {
-                            tempSave.put(previousS.substring(k), previousS);
-                        }
-                    }
-                    currentS = "";
+                table[i][j] = (i == 0 || j == 0) ? 1
+                        : 1 + table[i - 1][j - 1];
+            }
+        }
+
+
+        //Looping top diag
+        for (int i = table.length - 1; i > 0; i--) {
+            String temp = "";
+            String word = "";
+
+            currentSequence = 0;
+            previousSequence = 0;
+            foundSequence = false;
+
+            for (int j = 0, x = i; x <= table.length - 1; j++, x++) {
+                previousSequence = currentSequence;
+                temp = temp+ Integer.toString(table[x][j]);
+                currentSequence = table[x][j];
+
+                if(foundSequence && (currentSequence != previousSequence+1) && (currentSequence == 0)){
+                    foundSequence = false;
+
+                    if(!words.contains(word) && word.length() >= filterNum)
+                        words.add(word);
+
+                    word = "";
+                }
+                else if(foundSequence && x == table.length - 1) {
+                    foundSequence = false;
+                    word += s.charAt(x);
+
+                    if(!words.contains(word) && word.length() >= filterNum)
+                        words.add(word);
+
+                    word = "";
+                }
+                else if(foundSequence) {
+                    word += s.charAt(x);
+                }
+                else if(currentSequence == previousSequence+1) {
+                    word += s.charAt(x);
+                    foundSequence = true;
+                }
+            }
+            //System.out.println(temp);
+        }
+
+
+
+
+
+        //Looping bottom diag
+        for (int i = 0; i <= table.length - 1; i++) {
+            String temp = "";
+            String word = "";
+
+            currentSequence = 0;
+            previousSequence = 0;
+            foundSequence = false;
+
+            for (int j = 0, y = i; y <= table.length - 1; j++, y++) {
+                previousSequence = currentSequence;
+                temp = temp+ Integer.toString(table[j][y]);
+                currentSequence = table[j][y];
+
+                if(foundSequence && (currentSequence != previousSequence+1) && currentSequence == 0){
+                    foundSequence = false;
+
+                    if(!words.contains(word) && word.length() >= filterNum)
+                        words.add(word);
+
+                    word = "";
+
+                }
+                else if(foundSequence && y == table.length - 1) {
+                    foundSequence = false;
+                    word += s.charAt(j);
+
+                    if(!words.contains(word) && word.length() >= filterNum)
+                        words.add(word);
+
+                    word = "";
+                }
+                else if(foundSequence) {
+                    word += s.charAt(j);
+                }
+                else if(currentSequence == previousSequence+1) {
+                    word += s.charAt(j);
+                    foundSequence = true;
+                }
+            }
+            //System.out.println(temp);
+        }
+
+
+
+        //Removing duplicates (duplicates include substrings of strings in the arraylist)
+        ArrayList<String> filteredSimilarities = (ArrayList<String>) words.clone();
+
+        for(String sequence1: words) {
+            for(String sequence2: words) {
+                if(!sequence1.equals(sequence2) && sequence1.contains(sequence2)) {
+                    filteredSimilarities.remove(sequence2);
                 }
             }
         }
 
-        //Printing out sequences to let user know that computation has been completed for this unit
-        for(String sequence: allCommonSequences)
-        {
-            System.out.println(sequence);
+
+        //Printing out result
+        for(String word: filteredSimilarities) {
+            System.out.println(word);
         }
 
-        return allCommonSequences;
+
+        return filteredSimilarities;
     }
 
 }

@@ -138,11 +138,9 @@ public class main {
             writeLineageAverage(lineageAverage);
         }
 
+        lineageAverageConverter testing = new lineageAverageConverter(lineageAverage);
 
-        System.out.println(lineageAverage);
-
-
-
+        System.out.println(testing.convertAverageToInput());
 
     }
 

@@ -102,8 +102,10 @@ public class ParentChildComparator {
                 if(foundSequence && (currentSequence != previousSequence+1) && (currentSequence == 0)){
                     foundSequence = false;
 
-                    if(!words.contains(word) && word.length() >= filterNum)
+                    if(!words.contains(word) && word.length() >= filterNum) {
+                        word += "@";
                         words.add(word);
+                    }
 
                     word = "";
                 }
@@ -111,8 +113,10 @@ public class ParentChildComparator {
                     foundSequence = false;
                     word += s.charAt(x);
 
-                    if(!words.contains(word) && word.length() >= filterNum)
+                    if(!words.contains(word) && word.length() >= filterNum) {
+                        word += "@";
                         words.add(word);
+                    }
 
                     word = "";
                 }
@@ -148,8 +152,10 @@ public class ParentChildComparator {
                 if(foundSequence && (currentSequence != previousSequence+1) && currentSequence == 0){
                     foundSequence = false;
 
-                    if(!words.contains(word) && word.length() >= filterNum)
+                    if(!words.contains(word) && word.length() >= filterNum) {
+                        word += "@";
                         words.add(word);
+                    }
 
                     word = "";
 
@@ -158,8 +164,10 @@ public class ParentChildComparator {
                     foundSequence = false;
                     word += s.charAt(j);
 
-                    if(!words.contains(word) && word.length() >= filterNum)
+                    if(!words.contains(word) && word.length() >= filterNum) {
+                        word += "@";
                         words.add(word);
+                    }
 
                     word = "";
                 }

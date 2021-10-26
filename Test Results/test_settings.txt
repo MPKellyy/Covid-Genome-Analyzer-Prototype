@@ -1,0 +1,22 @@
+Sequential Pattern Mining (frequent patterns)
+CSPAM
+Minsup = 0.33
+Min pattern = 9
+Max pattern = 9
+
+TKS (Enhanced form of CSPAM)
+K = 500
+Min pattern = 12
+Max pattern = 12
+
+
+Sequential Rule Mining (sequential rules)
+ERMINER
+Minsup = 0.33
+Minsconf = 0.7
+
+
+Frequent Items Sets (frequent patterns consist of these item sets)
+Apriori
+Minsup = 0 
+(NOTE: 0 Minsup was chosen to view all occurrences of found item sets. This helps put frequency of larger appearences into perspective.

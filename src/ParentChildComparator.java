@@ -38,10 +38,6 @@ public class ParentChildComparator {
             t += childMap.get(childKey) + "-";
         }
 
-//        s = "Hello";
-//        t = "Hello World";
-
-
         //Ensuring strings are same size
         int sSize = s.length();
         int tSize = t.length();
@@ -128,7 +124,6 @@ public class ParentChildComparator {
                     foundSequence = true;
                 }
             }
-            //System.out.println(temp);
         }
 
 
@@ -179,7 +174,6 @@ public class ParentChildComparator {
                     foundSequence = true;
                 }
             }
-            //System.out.println(temp);
         }
 
 

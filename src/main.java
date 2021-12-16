@@ -1,3 +1,5 @@
+import javax.imageio.ImageIO;
+import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileWriter;
@@ -94,7 +96,7 @@ public class main {
          * The end result is a sequence of nucleotide sequences that were kept between each parent-child
          * strain in the lineage.
          *
-         * Note: Each computation as of now takes a VERY long time to compute (approx 2-3 hours).
+         * Note: Each computation as of now takes a VERY long time to compute (approx 1 hour).
          * To save time, I have included a txt file that already has the compiled results
          * called "lineage-average.txt".
          */
@@ -120,6 +122,7 @@ public class main {
         catch (FileNotFoundException e) {
             //Setting up array that will hold all of the unit averages
             ArrayList<String> similarityArray = new ArrayList<String>();
+            ArrayList<String> tempArray = new ArrayList<String>();
 
             //Creating parent-child associations
             ParentChildComparator parentChildBA = new ParentChildComparator(Beta, Alpha);
@@ -131,12 +134,32 @@ public class main {
             ParentChildComparator parentChildEL = new ParentChildComparator(Eta, Lambda);
 
             //Adding the unit averages into a singular array
-            updateSimilarityArray(similarityArray, parentChildBA.computeUnitAverage(FILTER_NUM));
+            tempArray = (ArrayList<String>) parentChildBA.computeUnitAverage(FILTER_NUM).clone();
+            similaritiesToImg(tempArray, "Beta-Alpha-IMG");
+            updateSimilarityArray(similarityArray, tempArray);
+
+            tempArray = (ArrayList<String>) parentChildAD.computeUnitAverage(FILTER_NUM).clone();
+            similaritiesToImg(tempArray, "Alpha-Delta-IMG");
             updateSimilarityArray(similarityArray, parentChildAD.computeUnitAverage(FILTER_NUM));
+
+            tempArray = (ArrayList<String>) parentChildDK.computeUnitAverage(FILTER_NUM).clone();
+            similaritiesToImg(tempArray, "Delta-Kappa-IMG");
             updateSimilarityArray(similarityArray, parentChildDK.computeUnitAverage(FILTER_NUM));
+
+            tempArray = (ArrayList<String>) parentChildKG.computeUnitAverage(FILTER_NUM).clone();
+            similaritiesToImg(tempArray, "Kappa-Gamma-IMG");
             updateSimilarityArray(similarityArray, parentChildKG.computeUnitAverage(FILTER_NUM));
+
+            tempArray = (ArrayList<String>) parentChildGI.computeUnitAverage(FILTER_NUM).clone();
+            similaritiesToImg(tempArray, "Gamma-Iota-IMG");
             updateSimilarityArray(similarityArray, parentChildGI.computeUnitAverage(FILTER_NUM));
+
+            tempArray = (ArrayList<String>) parentChildIE.computeUnitAverage(FILTER_NUM).clone();
+            similaritiesToImg(tempArray, "Iota-Eta-IMG");
             updateSimilarityArray(similarityArray, parentChildIE.computeUnitAverage(FILTER_NUM));
+
+            tempArray = (ArrayList<String>) parentChildEL.computeUnitAverage(FILTER_NUM).clone();
+            similaritiesToImg(tempArray, "Eta-Lambda-IMG");
             updateSimilarityArray(similarityArray, parentChildEL.computeUnitAverage(FILTER_NUM));
 
             //Concatenating all unit averages into one string
@@ -242,4 +265,65 @@ public class main {
             return false;
         }
     }
+
+    /**
+     * Function used to convert similarity sequences to a png image representation
+     * @param similarities input similarity sequences
+     * @param imgName Name of the resultant image
+     * @return true/false based on operation completion
+     */
+    public static boolean similaritiesToImg(ArrayList<String> similarities, String imgName) {
+        String contents = similarities.toString();
+        contents = contents.replaceAll("[^atgc]", "");
+
+        //image dimension based on size of all sequences combined
+        int width = contents.length();
+        int height = width;
+
+        //Creating image
+        BufferedImage img = new BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB);
+        //Creating file object
+        File file = null;
+        //Creating vertical line of color per nucleotide
+        for(int y = 0; y < height; y++){
+            for(int x = 0; x < width; x++) {
+
+                int a = 255; //alpha
+                int r = 0; //red
+                int g = 0; //green
+                int b = 0; //blue
+
+                switch(contents.charAt(x)) {
+                    case 'a'://a - red
+                        r = 255;
+                        break;
+                    case 't'://t - green
+                        g = 255;
+                        break;
+                    case 'g'://g - blue
+                        b = 225;
+                        break;
+                    case 'c'://c - yellow
+                        r = 225;
+                        g = 225;
+                        break;
+                }
+
+                int p = (a<<24) | (r<<16) | (g<<8) | b; //pixel
+
+                img.setRGB(x, y, p);
+            }
+        }
+        //Generating image
+        try{
+            file = new File(imgName +".png");
+            ImageIO.write(img, "png", file);
+            return true;
+        }catch(IOException e) {
+            System.out.println("Error: " + e);
+            return false;
+        }
+
+    }
+
 }
